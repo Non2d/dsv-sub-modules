@@ -1,1 +1,6 @@
 .venv
+.env
+words-to-sentences/data/*
+words-to-sentences/dst/*
+audio-to-text/input_audio/*
+audio-to-text/output_text/*
