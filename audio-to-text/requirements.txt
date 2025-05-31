@@ -3,4 +3,4 @@ python-dotenv
 numpy
 transformers
 yt-dlp
-# torch e.g.) pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu126
+# torch関連のライブラリは，READMEを参考に個別にインストールしてください． e.g.) pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu126
