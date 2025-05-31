@@ -1,18 +1,33 @@
-.venv
+# Python virtual environment
+.venv/
+
+# Environment variables
 .env
-words-to-sentences/data/*
-words-to-sentences/dst/*
-audio-to-text/input_audio/*
-audio-to-text/output_text/*
-words-to-sentences/src/diarization/*
-words-to-sentences/src/speech-recognition/*
+
+# audio to text
+audio-to-text/src/*
+audio-to-text/dst/diarization/*
+audio-to-text/dst/speech-recognition/*
+
+!audio-to-text/src/.gitkeep
+!audio-to-text/dst/diarization/.gitkeep
+!audio-to-text/dst/speech-recognition/.gitkeep
+
+# sentences to speeches
 sentences-to-speeches/src/*
 sentences-to-speeches/dst/*
-!words-to-sentences/data/.gitkeep
-!words-to-sentences/dst/.gitkeep
-!audio-to-text/input_audio/.gitkeep
-!audio-to-text/output_text/.gitkeep
-!words-to-sentences/src/diarization/.gitkeep
-!words-to-sentences/src/speech-recognition/.gitkeep
+
 !sentences-to-speeches/src/.gitkeep
 !sentences-to-speeches/dst/.gitkeep
+
+# words to sentences
+words-to-sentences/src/diarization/*
+words-to-sentences/src/speech-recognition/*
+words-to-sentences/dst/*
+
+!words-to-sentences/src/diarization/.gitkeep
+!words-to-sentences/src/speech-recognition/.gitkeep
+!words-to-sentences/dst/.gitkeep
+
+
+

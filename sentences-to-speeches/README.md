@@ -1,4 +1,5 @@
-This is a module for converting sentences to speeches(consisted of speeches, not argunits.)
+This is a module for converting sentences to speeches
+Note that these speeches are incomplete in that they are not consisted of argunits, but speeches.
 
 ## Environment Setup
 
