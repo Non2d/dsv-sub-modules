@@ -2,6 +2,7 @@ import pandas as pd
 import nltk
 from nltk.tokenize import PunktSentenceTokenizer
 from collections import Counter
+import os
 
 # 必要なデータをダウンロード（初回のみ）
 nltk.download('punkt')
@@ -109,31 +110,36 @@ def convert_words_to_sentences(data: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(merged_data)
 
 if __name__ == "__main__":
-    file_name = "Final WSDC 2017-text-turbo-from-mp3"
-    csv_file_path = f"data/{file_name}.csv"
-    speaker_file_path = f"data/Final WSDC 2017-diarization.csv"
-    output_file_path = f"dst/merged_{file_name}.csv"
-    words_with_speakers_file = f"dst/words_with_speakers_{file_name}.csv"  # 出力ファイル名
+    # src/diarizationとsrc/speech-recognitionの両方に同名ファイルがある前提
+    diarization_dir = "src/diarization"
+    speech_recognition_dir = "src/speech-recognition"
+    dst_dir = "dst"
 
-    try:
-        # CSVファイルを読み込む
-        words_data = pd.read_csv(csv_file_path)
-        speaker_data = pd.read_csv(speaker_file_path)
+    # speech-recognition側のcsvファイル名一覧を取得（拡張子除く）
+    file_names = [
+        os.path.splitext(f)[0]
+        for f in os.listdir(speech_recognition_dir)
+        if f.endswith(".csv")
+    ]
 
-        # 話者分離データを単語データに紐づけ
-        words_with_speakers = assign_speakers_to_words(words_data, speaker_data)
+    for file_name in file_names:
+        speech_recognition_file_path = os.path.join(speech_recognition_dir, f"{file_name}.csv")
+        diarization_file_path = os.path.join(diarization_dir, f"{file_name}.csv")
+        words_with_speakers_file_path = os.path.join(dst_dir, f"words_with_speakers_{file_name}.csv")
+        sentences_file_path = os.path.join(dst_dir, f"sentences_{file_name}.csv")
 
-        # words_with_speakers を CSV に保存
-        words_with_speakers.to_csv(words_with_speakers_file, index=False, encoding="utf-8-sig")
-        print(f"words_with_speakers を {words_with_speakers_file} に保存しました。")
+        try:
+            words_recognition = pd.read_csv(speech_recognition_file_path)
+            speaker_data = pd.read_csv(diarization_file_path)
 
-        # 文単位に変換
-        merged_df = convert_words_to_sentences(words_with_speakers)
+            words_with_speakers = assign_speakers_to_words(words_recognition, speaker_data)
+            words_with_speakers.to_csv(words_with_speakers_file_path, index=False, encoding="utf-8-sig")
+            print(f"words_with_speakers を {words_with_speakers_file_path} に保存しました。")
 
-        # 結果をCSVに保存
-        merged_df.to_csv(output_file_path, index=False, encoding="utf-8-sig")
-        print(f"処理が完了しました。結果は {output_file_path} に保存されました。")
-        print(merged_df.head())
+            sentences = convert_words_to_sentences(words_with_speakers)
+            sentences.to_csv(sentences_file_path, index=False, encoding="utf-8-sig")
+            print(f"処理が完了しました。結果は {sentences_file_path} に保存されました。")
+            print(sentences.head())
 
-    except Exception as e:
-        print(f"エラーが発生しました: {e}")
+        except Exception as e:
+            print(f"エラーが発生しました: {e}")
