@@ -2,7 +2,7 @@ import pandas as pd
 import os
 from pathlib import Path
 
-def count_long_sentences(file_path, min_words=35):
+def count_long_sentences(file_path, min_words=40):
     """
     指定されたファイル内の長い文（指定単語数以上）をカウントする関数
     

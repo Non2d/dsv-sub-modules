@@ -40,60 +40,146 @@ def assign_speakers_to_words(words, diarizations):
     
     return words
 
+# def group_sentences_from_words(words: pd.DataFrame) -> pd.DataFrame:
+#     """
+#     単語単位のタイムスタンプ付き文字起こしデータを文単位に変換する関数。話者情報が欠けている場合、直前の話者を参照する。
+#     1単語追加ごとに文分割を試み、文が区切られた場合はその時点で文を保存するという逐次的なアプローチを採用。
+#     Args:
+#         words (pd.DataFrame): 単語単位の 'start', 'end', 'text', 'speaker' 列を含むデータフレーム。
+#     Returns:
+#         pd.DataFrame: 文単位の 'start', 'end', 'text', 'speaker' 列を含むデータフレーム。
+#     """
+#     sentences = []
+#     current_sentence = ""
+#     start_time = None
+#     end_time = None
+#     speakers_in_sentence = []
+#     last_valid_speaker = None  # 前回の有効な話者を記録
+
+#     for index, row in words.iterrows():
+#         if start_time is None:
+#             start_time = row['start']
+
+#         current_sentence += row['text']
+#         end_time = row['end']
+#         if row['speaker'] is not None:
+#             speakers_in_sentence.append(row['speaker'])
+#             last_valid_speaker = row['speaker']
+
+#         # spaCy を使用して文を分割
+#         doc = nlp(current_sentence.strip())
+#         tmp_sentences = [sent.text for sent in doc.sents]
+
+#         is_last_row = (index == words.index[-1])
+#         if len(tmp_sentences) > 1 or is_last_row:  # 文が区切られた場合、または最後の行の場合
+#             sentences_to_process = tmp_sentences if is_last_row else tmp_sentences[:-1]
+
+#             for sentence in sentences_to_process:
+#                 # 話者の頻度をカウントして最頻出話者を選択
+#                 if speakers_in_sentence:
+#                     most_common_speaker = Counter(speakers_in_sentence).most_common(1)[0][0]
+#                 else:
+#                     most_common_speaker = last_valid_speaker
+
+#                 sentences.append({
+#                     'speaker': most_common_speaker,
+#                     'start': start_time,
+#                     'end': end_time,
+#                     'text': sentence,
+#                 })
+
+#                 if not is_last_row:
+#                     start_time = None
+#                     speakers_in_sentence = []
+
+#             if not is_last_row:
+#                 current_sentence = tmp_sentences[-1]
+
+#     return pd.DataFrame(sentences)
+
 def group_sentences_from_words(words: pd.DataFrame) -> pd.DataFrame:
     """
-    単語単位のタイムスタンプ付き文字起こしデータを文単位に変換する関数。話者情報が欠けている場合、直前の話者を参照する。
+    単語単位のタイムスタンプ付き文字起こしデータを文単位に変換する関数。
+    全単語を結合してから文分割し、各文に対応する単語範囲を特定してタイムスタンプと話者を決定する。
+    
     Args:
         words (pd.DataFrame): 単語単位の 'start', 'end', 'text', 'speaker' 列を含むデータフレーム。
     Returns:
         pd.DataFrame: 文単位の 'start', 'end', 'text', 'speaker' 列を含むデータフレーム。
     """
-    sentences = []
-    current_sentence = ""
-    start_time = None
-    end_time = None
-    speakers_in_sentence = []
-    last_valid_speaker = None  # 前回の有効な話者を記録
-
-    for index, row in words.iterrows():
-        if start_time is None:
-            start_time = row['start']
-
-        current_sentence += row['text']
-        end_time = row['end']
-        if row['speaker'] is not None:
-            speakers_in_sentence.append(row['speaker'])
+    if words.empty:
+        return pd.DataFrame(columns=['start', 'end', 'text', 'speaker'])
+    
+    # 話者情報の補完（欠けている場合は直前の話者を参照）
+    words = words.copy()
+    last_valid_speaker = None
+    for i, row in words.iterrows():
+        if pd.notna(row['speaker']) and row['speaker'] is not None:
             last_valid_speaker = row['speaker']
-
-        # spaCy を使用して文を分割
-        doc = nlp(current_sentence.strip())
-        tmp_sentences = [sent.text for sent in doc.sents]
-
-        is_last_row = (index == words.index[-1])
-        if len(tmp_sentences) > 1 or is_last_row:  # 文が区切られた場合、または最後の行の場合
-            sentences_to_process = tmp_sentences if is_last_row else tmp_sentences[:-1]
-
-            for sentence in sentences_to_process:
-                # 話者の頻度をカウントして最頻出話者を選択
-                if speakers_in_sentence:
-                    most_common_speaker = Counter(speakers_in_sentence).most_common(1)[0][0]
-                else:
-                    most_common_speaker = last_valid_speaker
-
-                sentences.append({
-                    'speaker': most_common_speaker,
-                    'start': start_time,
-                    'end': end_time,
-                    'text': sentence,
-                })
-
-                if not is_last_row:
-                    start_time = None
-                    speakers_in_sentence = []
-
-            if not is_last_row:
-                current_sentence = tmp_sentences[-1]
-
+        elif last_valid_speaker is not None:
+            words.at[i, 'speaker'] = last_valid_speaker
+    
+    # 全単語を結合
+    full_text = ''.join(words['text'].astype(str))
+    
+    # spaCyで文分割
+    doc = nlp(full_text)
+    sentence_texts = [sent.text for sent in doc.sents]
+    
+    sentences = []
+    word_idx = 0
+    char_offset = 0
+    
+    for sentence_text in sentence_texts:
+        sentence_start_time = None
+        sentence_end_time = None
+        speakers_in_sentence = []
+        
+        # この文に含まれる単語を特定
+        sentence_char_end = char_offset + len(sentence_text)
+        sentence_word_start_idx = word_idx
+        
+        # 文に含まれる単語を収集
+        while word_idx < len(words):
+            word = words.iloc[word_idx]
+            word_text = str(word['text'])
+            word_char_start = char_offset
+            word_char_end = char_offset + len(word_text)
+            
+            # 単語が文の範囲内にある場合
+            if word_char_start < sentence_char_end:
+                if sentence_start_time is None:
+                    sentence_start_time = word['start']
+                sentence_end_time = word['end']
+                
+                if pd.notna(word['speaker']):
+                    speakers_in_sentence.append(word['speaker'])
+                
+                char_offset = word_char_end
+                word_idx += 1
+                
+                # 文の終端に達した場合
+                if word_char_end >= sentence_char_end:
+                    break
+            else:
+                break
+        
+        # 話者決定（最頻出話者を選択）
+        if speakers_in_sentence:
+            most_common_speaker = Counter(speakers_in_sentence).most_common(1)[0][0]
+        else:
+            most_common_speaker = None
+        
+        sentences.append({
+            'speaker': most_common_speaker,
+            'start': sentence_start_time,
+            'end': sentence_end_time,
+            'text': sentence_text,
+        })
+        
+        # 次の文の開始位置を設定
+        char_offset = sentence_char_end
+    
     return pd.DataFrame(sentences)
 
 if __name__ == "__main__":
