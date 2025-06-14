@@ -73,7 +73,7 @@ def create_single_debate_data_from_json(json_file_path: str, index: int = 0) -> 
 # 使用例
 if __name__ == "__main__":
     import csv
-    from calculator_correct import MacroStructuralCalculatorCorrect
+    from calculator import MacroStructuralCalculator
     
     # 絶対パスを使用
     json_path = os.path.join(os.path.dirname(__file__), 'debate_scripts.json')
@@ -87,7 +87,7 @@ if __name__ == "__main__":
     # 各ディベートの特徴量を計算
     results = []
     for i, round_data in enumerate(debate_scripts):
-        calculator = MacroStructuralCalculatorCorrect(round_data)
+        calculator = MacroStructuralCalculator(round_data)
         features = calculator.calculate_all()
         
         result = {

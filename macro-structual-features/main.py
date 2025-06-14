@@ -1,73 +1,48 @@
 """
-Main interface for macro-structural features calculation
-
-Usage example:
-    from macro_structual_features import MacroStructuralCalculator, DebateData, Rebuttal
-    
-    # Create debate data
-    speeches = [1, 3, 5, 7, 9, 11]  # North American style
-    rebuttals = [
-        Rebuttal(src=2, dst=0),
-        Rebuttal(src=4, dst=1),
-        Rebuttal(src=6, dst=2),
-    ]
-    
-    # Calculate features
-    data = DebateData(speeches, rebuttals)
-    calculator = MacroStructuralCalculator(data)
-    results = calculator.calculate_all()
-    
-    print(results)
+Main execution script for macro-structural features calculation
 """
 
-try:
-    from .models import Rebuttal, DebateData
-    from .calculator import MacroStructuralCalculator
-    from .sample_data import (
-        get_sample_north_american_style,
-        get_sample_asian_style,
-        get_sample_interval_case,
-        get_sample_rally_chain,
-        get_sample_order_crossing
-    )
-except ImportError:
-    from models import Rebuttal, DebateData
-    from calculator import MacroStructuralCalculator
-    from sample_data import (
-        get_sample_north_american_style,
-        get_sample_asian_style,
-        get_sample_interval_case,
-        get_sample_rally_chain,
-        get_sample_order_crossing
-    )
+import json
+import csv
+from calculator import MacroStructuralCalculator
 
 
-def demo():
-    """Demonstration of the macro-structural features calculator"""
-    print("=== Macro-Structural Features Calculator Demo ===\n")
+def main():
+    """Calculate macro-structural features for all debates and save to TSV"""
+    print("Calculating macro-structural features...")
     
-    # Test with different sample data sets
-    samples = [
-        ("North American Style", get_sample_north_american_style()),
-        ("Asian Style", get_sample_asian_style()),
-        ("Interval Case", get_sample_interval_case()),
-        ("Rally Chain", get_sample_rally_chain()),
-        ("Order Crossing", get_sample_order_crossing()),
-    ]
+    # Load data
+    with open('data/debate_scripts.json', 'r', encoding='utf-8') as f:
+        debate_scripts = json.load(f)
     
-    for name, data in samples:
-        print(f"--- {name} ---")
-        print(f"Speeches: {data.speeches}")
-        print(f"Rebuttals: {data.rebuttals}")
+    print(f"Loaded {len(debate_scripts)} debate rounds")
+    
+    # Calculate features
+    results = []
+    for i, round_data in enumerate(debate_scripts):
+        calculator = MacroStructuralCalculator(round_data)
+        features = calculator.calculate_all()
         
-        calculator = MacroStructuralCalculator(data)
-        results = calculator.calculate_all()
-        
-        print("Results:")
-        for feature, value in results.items():
-            print(f"  {feature.capitalize()}: {value:.4f}")
-        print()
+        result = {
+            'debate_id': i,
+            'title': round_data['source']['title'],
+            'distance': features['distance'],
+            'interval': features['interval'],
+            'order': features['order'],
+            'rally': features['rally'],
+        }
+        results.append(result)
+        print(f"Debate {i}: {features}")
+    
+    # Save to TSV
+    with open('data/macro_structural_features.tsv', 'w', newline='', encoding='utf-8') as f:
+        fieldnames = ['debate_id', 'title', 'distance', 'interval', 'order', 'rally']
+        writer = csv.DictWriter(f, fieldnames=fieldnames, delimiter='\t')
+        writer.writeheader()
+        writer.writerows(results)
+    
+    print(f"\nResults saved to: data/macro_structural_features.tsv")
 
 
 if __name__ == "__main__":
-    demo()
+    main()
