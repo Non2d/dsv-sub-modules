@@ -3,6 +3,11 @@ Demo script showing how to use the macro-structural features calculator
 """
 
 import json
+import sys
+import os
+
+# Add src directory to path  
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 from calculator import MacroStructuralCalculator
 
 
@@ -11,7 +16,8 @@ def demo():
     print("=== Macro-Structural Features Demo ===\n")
     
     # Load sample data
-    with open('data/debate_scripts.json', 'r', encoding='utf-8') as f:
+    data_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'debate_scripts.json')
+    with open(data_path, 'r', encoding='utf-8') as f:
         debate_scripts = json.load(f)
     
     # Calculate features for first 3 debates

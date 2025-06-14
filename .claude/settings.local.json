@@ -7,7 +7,14 @@
       "Bash(cp:*)",
       "Bash(rm:*)",
       "Bash(python:*)",
-      "Bash(pip install:*)"
+      "Bash(pip install:*)",
+      "Bash(find:*)",
+      "Bash(ls:*)",
+      "Bash(mkdir:*)",
+      "Bash(mv:*)",
+      "Bash(true)",
+      "Bash(touch:*)",
+      "Bash(tree:*)"
     ],
     "deny": []
   }

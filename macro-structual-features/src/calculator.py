@@ -9,7 +9,10 @@ from itertools import groupby
 
 # Add features directory to path
 sys.path.append(os.path.join(os.path.dirname(__file__), 'features'))
-from features import calc_distance, calc_interval, calc_rally, calc_order
+from features.distance import calc_distance
+from features.interval import calc_interval
+from features.rally import calc_rally
+from features.order import calc_order
 
 
 def localize(round_data, adu_id):
