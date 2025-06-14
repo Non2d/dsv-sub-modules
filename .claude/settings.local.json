@@ -5,7 +5,9 @@
       "Bash(python test_distance_debug.py:*)",
       "Bash(python3:*)",
       "Bash(cp:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(python:*)",
+      "Bash(pip install:*)"
     ],
     "deny": []
   }
