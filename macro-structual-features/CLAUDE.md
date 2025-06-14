@@ -27,3 +27,15 @@ speeches = [1, 3, 5, 7, 9, 11]
 Here, each speech contains 2 statements (transcripts), and `speeches` tracks where each speech ends.
 
 Finally, we define **rebuttals** as a list of tuples, where each tuple contains the ID of a rebuttal transcript and the ID of the transcript it targets.
+
+## Point of Information (POI)
+
+In parliamentary debates, speakers can raise **Points of Information (POIs)** during their opponents' speeches. A POI is a brief interjection where the non-speaking team asks a question or makes a challenge to the current speaker.
+
+Key characteristics of POIs:
+- **Team Reversal**: When a POI is raised, the team roles are temporarily reversed - the team that is normally listening becomes the "attacking" team for that specific ADU
+- **Timing**: POIs typically occur during the middle portion of speeches (not at the beginning or end)
+- **Brief Duration**: POIs are usually limited to 15-30 seconds
+- **Speaker Control**: The current speaker can choose to accept or decline the POI
+
+For our model, POI ADUs have a special property: their team affiliation is opposite to the speech they appear in. For example, if a Government speaker is giving a speech and an Opposition member raises a POI, that POI ADU belongs to the Opposition team even though it appears within a Government speech.

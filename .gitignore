@@ -29,5 +29,5 @@ words-to-sentences/dst/*
 !words-to-sentences/src/speech-recognition/.gitkeep
 !words-to-sentences/dst/.gitkeep
 
-
+__pycache__/
 
