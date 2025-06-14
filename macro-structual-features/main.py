@@ -10,7 +10,7 @@ import os
 # Add src directory to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
 from calculator import MacroStructuralCalculator
-
+from calc_accuracy import calc_accuracy
 
 def calculate_score(norm_distance, norm_rally, norm_interval, norm_order):
     """Calculate score using the formula: norm(rally) + norm(order) + (1-norm(interval)) + (1-norm(distance))"""
@@ -140,6 +140,8 @@ def main():
     for result in normalized_results:
         print(f"  ID {result['debate_id']+1}: {result['score']:.9f}")
     
+    # Calculate accuracy/correlation with ground truth
+    calc_accuracy(script_dir)
 
 
 if __name__ == "__main__":
