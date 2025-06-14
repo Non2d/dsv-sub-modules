@@ -1,8 +1,10 @@
 """
 Test functions for Order feature calculation
 """
-
-from order import calc_order
+import sys
+import os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
+from features.order import calc_order
 
 
 def test_order():
@@ -25,7 +27,7 @@ def test_order():
     # Speech 2: (20,15)-(21,12) = crossing (15>12)
     # reb_src_shared = 1, reb_crossed = 1, reb_num = 5
     # order_value = 5 / (1+1) = 2.5, result = 1/2.5 = 0.4
-    expected = 1.0 / 2.5
+    expected = 2.5
     
     print(f"Test 1 - Basic crossing and shared:")
     print(f"  Expected: {expected}")
@@ -47,7 +49,7 @@ def test_order():
     # Speech 1: (15,20)-(16,18) = crossing (20>18)
     # reb_src_shared = 0, reb_crossed = 1, reb_num = 3 (4-1 POI)
     # order_value = 3/1 = 3, result = 1/3
-    expected2 = 1.0 / 3.0
+    expected2 = 3.0
     
     print(f"\nTest 2 - With POI attacks:")
     print(f"  Expected: {expected2}")

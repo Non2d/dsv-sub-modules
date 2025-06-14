@@ -103,6 +103,7 @@ class MacroStructuralCalculator:
             self.slen
         )
     
+    
     def calc_order(self) -> float:
         """Calculate Order feature"""
         return calc_order(

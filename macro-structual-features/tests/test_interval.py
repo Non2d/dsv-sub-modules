@@ -2,7 +2,10 @@
 Test functions for Interval feature calculation
 """
 
-from interval import calc_interval
+import sys
+import os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
+from features.interval import calc_interval
 
 
 def test_interval():

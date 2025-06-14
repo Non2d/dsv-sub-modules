@@ -44,7 +44,4 @@ def calc_order(att_src_by_speech: List[List[Tuple[int, int]]],
         return -1.0
     
     order_value = reb_num / (reb_src_shared + reb_crossed)
-    # 最終結果は逆数
-    return 1.0 / order_value
-
-
+    return order_value

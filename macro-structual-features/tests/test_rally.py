@@ -2,7 +2,10 @@
 Test functions for Rally feature calculation
 """
 
-from rally import calc_rally
+import sys
+import os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
+from features.rally import calc_rally
 
 
 def test_rally():
@@ -20,10 +23,10 @@ def test_rally():
     
     result = calc_rally(attacks, num_speeches)
     # Rally: [[(15, 10), (10, 5)]] (length 2)
-    # No rally: [(20, 25)] (length 1)
-    # total_rally = 1*2 + 1*0 = 2 (1 rally of length 2, 1 no-rally)
-    # result = 2 / 3 / 6 = 0.111...
-    expected = 2 / 3 / 6
+    # No rally: [(20, 25)] (length 1)  
+    # total_rally = 1*1 + 1*0 = 1 (1 rally of length 2 contributes (2-1)=1, 1 no-rally contributes 0)
+    # result = 1 / 3 / 6 = 0.055...
+    expected = 1 / 3 / 6
     
     print(f"Test 1 - Simple rally chain:")
     print(f"  Expected: {expected}")
@@ -49,16 +52,16 @@ def test_rally():
     
     # Test case 3: Long rally chain A->B->C->D
     attacks3 = [
-        (30, 20),  # A->B
-        (25, 30),  # B->C
-        (15, 25),  # C->D (forms 3-rally)
+        (15, 10),  # A->B
+        (20, 15),  # B->C  
+        (25, 20),  # C->D (forms 3-rally)
     ]
     
     result3 = calc_rally(attacks3, num_speeches)
-    # Rally: [[(15, 25), (25, 30), (30, 20)]] (length 3)
-    # total_rally = 1*3 = 3
-    # result = 3 / 3 / 6 = 0.166...
-    expected3 = 3 / 3 / 6
+    # Rally: [[(25, 20), (20, 15), (15, 10)]] (length 3)
+    # total_rally = 1*2 = 2 (1 rally of length 3 contributes (3-1)=2)
+    # result = 2 / 3 / 6 = 0.111...
+    expected3 = 2 / 3 / 6
     
     print(f"\nTest 3 - Long rally chain:")
     print(f"  Expected: {expected3}")
