@@ -126,7 +126,7 @@ def main():
         result['score'] = score
     
     # Save normalized results with score to TSV
-    scored_output_path = os.path.join(script_dir, 'data/dst', 'scored_macro_structural_features.tsv')
+    scored_output_path = os.path.join(script_dir, 'data/dst', 'scored_macro_structural_features_old-interval.tsv')
     with open(scored_output_path, 'w', newline='', encoding='utf-8') as f:
         fieldnames = ['debate_id', 'title', 'distance', 'interval', 'order', 'rally', 'score']
         writer = csv.DictWriter(f, fieldnames=fieldnames, delimiter='\t')

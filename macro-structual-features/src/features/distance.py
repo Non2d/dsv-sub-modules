@@ -6,7 +6,8 @@ from typing import Dict, Any, List, Tuple
 
 
 def calc_distance(round_data: Dict[str, Any], attacks: List[Tuple[int, int]], 
-                 l_func, len_att_src_by_speech: List[int]) -> float:
+                 l_func, len_att_src_by_speech: List[int],
+                 version: int=1) -> float:
     """
     Calculate Distance feature (Far Rebuttal)
     

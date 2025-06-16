@@ -19,7 +19,7 @@ def filter_rally(arrays_list):
     return result
 
 
-def calc_rally(attacks: List[Tuple[int, int]], num_speeches: int) -> float:
+def calc_rally(attacks: List[Tuple[int, int]], num_speeches: int, version: int=1) -> float:
     """
     Calculate Rally feature
     

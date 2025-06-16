@@ -86,21 +86,24 @@ class MacroStructuralCalculator:
             self.round_data, 
             self.attacks, 
             l, 
-            self.len_att_src_by_speech
+            self.len_att_src_by_speech,
+            version=1,
         )
     
     def calc_interval(self) -> float:
         """Calculate Interval feature"""
         return calc_interval(
             self.att_src_by_speech,
-            self.len_adu_by_speech
+            self.len_adu_by_speech,
+            version=1,  # default: 2
         )
     
     def calc_rally(self) -> float:
         """Calculate Rally feature"""
         return calc_rally(
             self.attacks,
-            self.slen
+            self.slen,
+            version=1,
         )
     
     
@@ -109,7 +112,8 @@ class MacroStructuralCalculator:
         return calc_order(
             self.att_src_by_speech,
             self.attacks,
-            self.round_data.get("POIs", [])
+            self.round_data.get("POIs", []),
+            version=2,
         )
     
     def calculate_all(self) -> Dict[str, float]:
@@ -118,5 +122,5 @@ class MacroStructuralCalculator:
             'distance': self.calc_distance(),
             'interval': self.calc_interval(),
             'rally': self.calc_rally(),
-            'order': self.calc_order()
+            'order': self.calc_order(),
         }
