@@ -82,39 +82,52 @@ class MacroStructuralCalculator:
     
     def calc_distance(self) -> float:
         """Calculate Distance feature (Far Rebuttal)"""
+        versions = self.get_versions()
         return calc_distance(
             self.round_data, 
             self.attacks, 
             l, 
             self.len_att_src_by_speech,
-            version=1,
+            version=versions['distance'],
         )
     
     def calc_interval(self) -> float:
         """Calculate Interval feature"""
+        versions = self.get_versions()
         return calc_interval(
             self.att_src_by_speech,
             self.len_adu_by_speech,
-            version=1,  # default: 2
+            version=versions['interval'],
         )
     
     def calc_rally(self) -> float:
         """Calculate Rally feature"""
+        versions = self.get_versions()
         return calc_rally(
             self.attacks,
             self.slen,
-            version=1,
+            version=versions['rally'],
         )
     
     
     def calc_order(self) -> float:
         """Calculate Order feature"""
+        versions = self.get_versions()
         return calc_order(
             self.att_src_by_speech,
             self.attacks,
             self.round_data.get("POIs", []),
-            version=2,
+            version=versions['order'],
         )
+    
+    def get_versions(self) -> Dict[str, int]:
+        """Get version numbers for each feature"""
+        return {
+            'distance': 1,
+            'interval': 2, # minimum interval is considered
+            'rally': 1,
+            'order': 1,
+        }
     
     def calculate_all(self) -> Dict[str, float]:
         """Calculate all four macro-structural features"""

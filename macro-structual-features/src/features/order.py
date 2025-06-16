@@ -51,6 +51,10 @@ def calc_order(att_src_by_speech: List[List[Tuple[int, int]]],
         order_value = reb_num / (reb_src_shared + reb_crossed)
     elif version==2:
         order_value = reb_num / (reb_src_shared + reb_dst_shared + reb_crossed)
+    elif version==3:
+        order_value = reb_num / reb_crossed
+    elif version==4:
+        order_value = (reb_src_shared + reb_crossed) / reb_num
     else:
         raise ValueError("Invalid version for order calculation.")
     

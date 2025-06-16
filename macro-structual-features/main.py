@@ -35,6 +35,15 @@ def main():
     results = []
     feature_names = ['distance', 'interval', 'order', 'rally']
     
+    # Get version info from the first calculator
+    calculator_sample = MacroStructuralCalculator(debate_scripts[0])
+    versions = calculator_sample.get_versions()
+    
+    # Create versioned column names
+    versioned_columns = {}
+    for feature in feature_names:
+        versioned_columns[feature] = f"{feature}_v{versions[feature]}"
+    
     for i, round_data in enumerate(debate_scripts):
         calculator = MacroStructuralCalculator(round_data)
         features = calculator.calculate_all()
@@ -42,10 +51,10 @@ def main():
         result = {
             'debate_id': i,
             'title': round_data['source']['title'],
-            'distance': features['distance'],
-            'interval': features['interval'],
-            'order': features['order'],
-            'rally': features['rally'],
+            versioned_columns['distance']: features['distance'],
+            versioned_columns['interval']: features['interval'],
+            versioned_columns['order']: features['order'],
+            versioned_columns['rally']: features['rally'],
         }
         results.append(result)
         print(f"Debate {i}: {features}")
@@ -54,8 +63,9 @@ def main():
     max_values = {}
     for feature_name in feature_names:
         valid_values = []
+        versioned_col = versioned_columns[feature_name]
         for result in results:
-            value = result[feature_name]
+            value = result[versioned_col]
             if value is not None and value != -1 and value > 0:
                 valid_values.append(value)
         
@@ -77,58 +87,63 @@ def main():
         }
         
         for feature_name in feature_names:
-            original_value = result[feature_name]
+            versioned_col = versioned_columns[feature_name]
+            original_value = result[versioned_col]
             if original_value is not None and original_value != -1 and max_values[feature_name] > 0:
                 normalized_value = original_value / max_values[feature_name]
             else:
                 normalized_value = 0.0
             
-            normalized_result[feature_name] = normalized_value
+            normalized_result[versioned_col] = normalized_value
         
         normalized_results.append(normalized_result)
     
+    # Create version suffix for file names
+    version_suffix = f"_distance=v{versions['distance']}-interval=v{versions['interval']}-rally=v{versions['rally']}-order=v{versions['order']}"
+    
     # Save original results to TSV
-    original_output_path = os.path.join(script_dir, 'data/dst', 'macro_structural_features.tsv')
-    with open(original_output_path, 'w', newline='', encoding='utf-8') as f:
-        fieldnames = ['debate_id', 'title', 'distance', 'interval', 'order', 'rally']
-        writer = csv.DictWriter(f, fieldnames=fieldnames, delimiter='\t')
-        writer.writeheader()
-        writer.writerows(results)
+    # original_output_path = os.path.join(script_dir, 'data/dst', f'macro_structural_features{version_suffix}.tsv')
+    # with open(original_output_path, 'w', newline='', encoding='utf-8') as f:
+    #     fieldnames = ['debate_id', 'title'] + [versioned_columns[f] for f in feature_names]
+    #     writer = csv.DictWriter(f, fieldnames=fieldnames, delimiter='\t')
+    #     writer.writeheader()
+    #     writer.writerows(results)
     
     # Save normalized results to TSV
-    normalized_output_path = os.path.join(script_dir, 'data/dst', 'normalized_macro_structural_features.tsv')
-    with open(normalized_output_path, 'w', newline='', encoding='utf-8') as f:
-        fieldnames = ['debate_id', 'title', 'distance', 'interval', 'order', 'rally']
-        writer = csv.DictWriter(f, fieldnames=fieldnames, delimiter='\t')
-        writer.writeheader()
-        writer.writerows(normalized_results)
+    # normalized_output_path = os.path.join(script_dir, 'data/dst', f'normalized_macro_structural_features{version_suffix}.tsv')
+    # with open(normalized_output_path, 'w', newline='', encoding='utf-8') as f:
+    #     fieldnames = ['debate_id', 'title'] + [versioned_columns[f] for f in feature_names]
+    #     writer = csv.DictWriter(f, fieldnames=fieldnames, delimiter='\t')
+    #     writer.writeheader()
+    #     writer.writerows(normalized_results)
     
-    print(f"\nOriginal results saved to: {original_output_path}")
-    print(f"Normalized results saved to: {normalized_output_path}")
+    # print(f"\nOriginal results saved to: {original_output_path}")
+    # print(f"Normalized results saved to: {normalized_output_path}")
     
     # Display normalization statistics
     print(f"\nNormalization Statistics:")
     for feature_name in feature_names:
-        normalized_values = [r[feature_name] for r in normalized_results]
+        versioned_col = versioned_columns[feature_name]
+        normalized_values = [r[versioned_col] for r in normalized_results]
         min_norm = min(normalized_values)
         max_norm = max(normalized_values)
         avg_norm = sum(normalized_values) / len(normalized_values)
-        print(f"  {feature_name}: min={min_norm:.4f}, max={max_norm:.4f}, avg={avg_norm:.4f}")
+        print(f"  {versioned_col}: min={min_norm:.4f}, max={max_norm:.4f}, avg={avg_norm:.4f}")
     
     # Calculate and add score to normalized results
     for i, result in enumerate(normalized_results):
         score = calculate_score(
-            result['distance'],  # normalized distance
-            result['rally'],     # normalized rally
-            result['interval'],  # normalized interval
-            result['order']      # normalized order
+            result[versioned_columns['distance']],  # normalized distance
+            result[versioned_columns['rally']],     # normalized rally
+            result[versioned_columns['interval']],  # normalized interval
+            result[versioned_columns['order']]      # normalized order
         )
         result['score'] = score
     
     # Save normalized results with score to TSV
-    scored_output_path = os.path.join(script_dir, 'data/dst', 'scored_macro_structural_features_old-interval.tsv')
+    scored_output_path = os.path.join(script_dir, 'data/dst', f'macro_structural_features_with_socre_{version_suffix}.tsv')
     with open(scored_output_path, 'w', newline='', encoding='utf-8') as f:
-        fieldnames = ['debate_id', 'title', 'distance', 'interval', 'order', 'rally', 'score']
+        fieldnames = ['debate_id', 'title'] + [versioned_columns[f] for f in feature_names] + ['score']
         writer = csv.DictWriter(f, fieldnames=fieldnames, delimiter='\t')
         writer.writeheader()
         writer.writerows(normalized_results)
