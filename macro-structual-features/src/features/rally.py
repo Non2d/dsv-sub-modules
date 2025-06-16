@@ -83,7 +83,9 @@ def calc_rally(attacks: List[Tuple[int, int]], num_speeches: int, version: int=1
     if num_speeches == 0 or num_rebuttals == 0:
         return 0.0
     
-    # 最終結果の計算式
-    return total_rally / num_rebuttals / num_speeches
+    if version == 1:
+        rally_value = total_rally / num_rebuttals / num_speeches
+    else:
+        raise ValueError("Invalid version for rally calculation.")
 
-
+    return rally_value

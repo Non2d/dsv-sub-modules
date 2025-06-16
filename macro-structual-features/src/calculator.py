@@ -124,7 +124,7 @@ class MacroStructuralCalculator:
         """Get version numbers for each feature"""
         return {
             'distance': 1,
-            'interval': 2, # minimum interval is considered
+            'interval': 1, # 1: minimum interval is NOT considered
             'rally': 1,
             'order': 1,
         }

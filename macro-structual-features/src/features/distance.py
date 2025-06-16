@@ -37,6 +37,10 @@ def calc_distance(round_data: Dict[str, Any], attacks: List[Tuple[int, int]],
         return 0.0
     
     fs_far["round"]["ratio"] = fs_far["round"]["len"] / total_attacks_from_4th
-    return fs_far["round"]["ratio"]
-
-
+    
+    if version==1:
+        distance_value = fs_far["round"]["ratio"]
+    else:
+        raise ValueError("Invalid version for distance calculation.")
+    
+    return distance_value

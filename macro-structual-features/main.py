@@ -150,9 +150,59 @@ def main():
     
     print(f"Scored results saved to: {scored_output_path}")
     
+    # Transform features: 1-distance, 1-interval
+    transformed_results = []
+    for result in normalized_results:
+        transformed_result = result.copy()
+        # Apply transformations with updated column names
+        old_distance_col = versioned_columns['distance']
+        old_interval_col = versioned_columns['interval']
+        
+        # Create new column names
+        new_distance_col = f"1-{old_distance_col}"
+        new_interval_col = f"1-{old_interval_col}"
+        
+        # Remove old columns and add transformed ones
+        del transformed_result[old_distance_col]
+        del transformed_result[old_interval_col]
+        transformed_result[new_distance_col] = 1 - result[old_distance_col]
+        transformed_result[new_interval_col] = 1 - result[old_interval_col]
+        
+        # Recalculate score with transformed values
+        transformed_score = calculate_score(
+            transformed_result[new_distance_col],  # 1-distance
+            transformed_result[versioned_columns['rally']],     # rally (unchanged)
+            transformed_result[new_interval_col],  # 1-interval
+            transformed_result[versioned_columns['order']]      # order (unchanged)
+        )
+        transformed_result['score'] = transformed_score
+        transformed_results.append(transformed_result)
+    
+    # Save transformed results to TSV
+    transformed_output_path = os.path.join(script_dir, 'data/dst', f'macro_structural_features_transformed_{version_suffix}.tsv')
+    with open(transformed_output_path, 'w', newline='', encoding='utf-8') as f:
+        # Update fieldnames for transformed columns
+        transformed_fieldnames = ['debate_id', 'title']
+        for feature in feature_names:
+            if feature in ['distance', 'interval']:
+                transformed_fieldnames.append(f"1-{versioned_columns[feature]}")
+            else:
+                transformed_fieldnames.append(versioned_columns[feature])
+        transformed_fieldnames.append('score')
+        
+        writer = csv.DictWriter(f, fieldnames=transformed_fieldnames, delimiter='\t')
+        writer.writeheader()
+        writer.writerows(transformed_results)
+    
+    print(f"Transformed results saved to: {transformed_output_path}")
+    
     # Display calculated scores for verification
     print(f"\nCalculated Scores:")
     for result in normalized_results:
+        print(f"  ID {result['debate_id']+1}: {result['score']:.9f}")
+    
+    print(f"\nTransformed Scores:")
+    for result in transformed_results:
         print(f"  ID {result['debate_id']+1}: {result['score']:.9f}")
     
     # Calculate accuracy/correlation with ground truth
