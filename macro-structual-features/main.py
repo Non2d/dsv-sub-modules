@@ -208,6 +208,9 @@ def main():
     # Calculate accuracy/correlation with ground truth
     calc_accuracy(script_dir)
 
+    # Print total number of rebuttals
+    print(f"\nTotal number of rebuttals: {sum(len(round_data['attacks']) for round_data in debate_scripts)}")
+
 
 if __name__ == "__main__":
     main()

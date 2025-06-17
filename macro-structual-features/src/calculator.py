@@ -137,3 +137,18 @@ class MacroStructuralCalculator:
             'rally': self.calc_rally(),
             'order': self.calc_order(),
         }
+    
+    def get_total_rebuttal_count(self) -> int:
+        """Get total number of rebuttal relations from original data"""
+        total_count = 0
+    
+        # 元の議論データから直接反論関係をカウント
+        for speech in self.debate_data['argument']['speeches']:
+            if 'adus' in speech:
+                for adu in speech['adus']:
+                    if 'relations' in adu:
+                        for relation in adu['relations']:
+                            if relation.get('type') == 'attack':  # 反論関係のみ
+                                total_count += 1
+    
+        return total_count
