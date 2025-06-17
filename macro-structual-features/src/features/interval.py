@@ -34,12 +34,14 @@ def calc_interval(att_src_by_speech: List[List[Tuple[int, int]]],
         tmp_att_dst_adu_src = {}
 
     intervals_normalized = []
+    dst_shard_reb_count = 0
     
     for j, atts in enumerate(att_dst_adu_src):
         speech_len = len_adu_by_speech[j]
         
         for att in atts:
             tmp_x = att[-1][0] - att[0][0] - 1  # スピーチ内の間隔の総和
+            dst_shard_reb_count += len(att) - 1
             
             if version == 1:
                 # intervals_normalized2 (シンプルな正規化)
@@ -57,6 +59,6 @@ def calc_interval(att_src_by_speech: List[List[Tuple[int, int]]],
             
             else:
                 raise ValueError("Invalid version for interval calculation.")
-    
+    # print(f"dst_shard_reb_count: {dst_shard_reb_count}")
     # 最終結果は総和（平均ではない）
     return sum(intervals_normalized)
